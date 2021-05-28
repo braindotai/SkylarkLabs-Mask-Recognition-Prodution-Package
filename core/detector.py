@@ -43,7 +43,6 @@ def detect(
 
     Arguments:
     cv2_image              : (np.ndarray) Input cv2 image of type 
-                             (optional)
     
     Returns:
         'Mask' if mask is detected else 'No Mask'
