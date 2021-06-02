@@ -1,6 +1,5 @@
-from PIL import Image
 import cv2
-import mediapipe as mp
+from numpy.lib.type_check import imag
 from core.detector import detect
 
 def fancyDraw(img, bbox, label, l = 30, t = 3, rt = 1):
@@ -34,28 +33,17 @@ def fancyDraw(img, bbox, label, l = 30, t = 3, rt = 1):
 
 cap = cv2.VideoCapture(0)
 
-mpFaceDetection = mp.solutions.face_detection
-mpDraw = mp.solutions.drawing_utils
-faceDetection = mpFaceDetection.FaceDetection(0.74)
-
-i = -1
 while cap.isOpened():
     success, img = cap.read()
     
     if success:
-        i += 1
-        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        results = faceDetection.process(imgRGB)
+        outputs = detect(img)
 
-        if results.detections:
-            for detection in results.detections:
-                bboxC = detection.location_data.relative_bounding_box
-                ih, iw, ic = img.shape
-                bbox = int(bboxC.xmin * iw), int(bboxC.ymin * ih), int(bboxC.width * iw), int(bboxC.height * ih)
-                query_image = img[bbox[1]: bbox[1] + bbox[3], bbox[0]: bbox[0] + bbox[2]]
+        for box in outputs['has_mask']:
+            cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), (0, 0, 255), 3)
 
-                label = detect(query_image)
-                img = fancyDraw(img, bbox, label)
+        for box in outputs['has_no_mask']:
+            cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), (0, 255, 0), 3)
 
         cv2.imshow("Image", img)
         cv2.waitKey(1)

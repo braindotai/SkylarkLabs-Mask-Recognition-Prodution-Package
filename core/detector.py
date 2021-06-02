@@ -4,59 +4,63 @@ from __future__ import print_function
 
 import os
 import torch
-import torch.nn.functional as F
-from torchvision import transforms
 import numpy as np
 from typing import *
-from PIL import Image
-from .model import DISNet
+from .face_detection_model import FaceDetection
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PARAMETER_PATH = os.path.join(BASE_DIR, 'model', 'parameters.onnx')
 
 model = None
-transform = None
 initialized = None
 
-def initialize(reference_dir: str = None):
+def initialize():
     global model, transform, initialized
 
     print('Running initialization...')
 
-    model = DISNet()
-    model.load_state_dict(torch.load(os.path.join(BASE_DIR, 'model', 'parameters.pth')))
-    model.eval()
-    
-    transform = transforms.Compose([
-        transforms.Resize((136, 136)),
-        transforms.CenterCrop((112, 112)),
-        transforms.ToTensor(),
-    ])
+    model = FaceDetection(PARAMETER_PATH, faceThreshold = 0.725)
 
     initialized = True
 
 @torch.no_grad()
 def detect(
-    cv2_image: np.ndarray,
+    images: Union[np.ndarray, List[np.ndarray]] = None,
+    mask_threshold: float = 0.85,
 ):
     '''
     This function is meant to be run on inference.
 
     Arguments:
-    cv2_image              : (np.ndarray) Input cv2 image of type 
-    
+    images              : (np.ndarray)
+    mask_threshold      : (float)
+
     Returns:
         'Mask' if mask is detected else 'No Mask'
     '''
 
-    global model, transform, initialized
+    global model, initialized
 
     if not initialized:
         initialize()
     
-    outputs = model(transform(Image.fromarray(cv2_image)).unsqueeze(0))
+    if isinstance(images, np.ndarray):
+        result = {
+            'has_mask': [],
+            'has_no_mask': []
+        }
 
-    probs = F.softmax(outputs)[0]
+        outputFaces = model.detect(images)
 
-    label = f"Mask" if probs[0] >= 0.999 else f"No Mask"
-    
-    return label
+        for faceIdx in range(outputFaces.shape[0]):
+            faceBox = outputFaces[faceIdx, 0: 4]
+            maskProb = outputFaces[faceIdx, 5]
+
+            result['has_mask' if maskProb < mask_threshold else 'has_no_mask'].append((
+                int(faceBox[0]), int(faceBox[1]), int(faceBox[2]), int(faceBox[3])
+            ))
+
+        return result
+
+    elif isinstance(images, list):
+        return [detect(image) for image in images]

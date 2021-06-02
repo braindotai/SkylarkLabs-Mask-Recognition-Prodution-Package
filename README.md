@@ -19,13 +19,33 @@ This function is meant to be run on inference
 
 Arguments:
 ```
-cv2_image            : (np.ndarray) Input cv2 image of type 
+images              : Union[np.ndarray, List[np.ndarray]]
+mask_threshold      : (float)
 ```
 
 Returns:
+If images is single np.ndarray
 ```
-'Mask' if mask is detected else 'No Mask'
+{
+    'has_mask': [(x1, y1, x2, y2), (x1, y1, x2, y2), (x1, y1, x2, y2)],
+    'has_no_mask': [(x1, y1, x2, y2), (x1, y1, x2, y2), (x1, y1, x2, y2)]
+}
 ```
+If images is list of np.ndarray
+```
+[
+    {
+        'has_mask': [(x1, y1, x2, y2), (x1, y1, x2, y2), (x1, y1, x2, y2)],
+        'has_no_mask': [(x1, y1, x2, y2), (x1, y1, x2, y2), (x1, y1, x2, y2)]
+    },
+    {
+        'has_mask': [(x1, y1, x2, y2), (x1, y1, x2, y2), (x1, y1, x2, y2)],
+        'has_no_mask': [(x1, y1, x2, y2), (x1, y1, x2, y2), (x1, y1, x2, y2)]
+    },
+    ...
+]
+```
+
 
 ## Sample Usage
 
