@@ -46,31 +46,6 @@ If images is list of np.ndarray
 ]
 ```
 
-
-## Sample Usage
-
-Code:
-
-```python
-from core.detector import detect
-import cv2
-
-cv2_image = cv2.imread('image-path.png')
-
-outputs = detect(cv2_image)
-print(outputs)
-```
-
-Outputs:
-
-```
-Running initialization...
-
-'Mask'
-```
-
-
-
 # Author
 
 ## __Rishik Mourya__
