@@ -56,7 +56,7 @@ def detect(
             faceBox = outputFaces[faceIdx, 0: 4]
             maskProb = outputFaces[faceIdx, 5]
 
-            result['has_mask' if maskProb < mask_threshold else 'has_no_mask'].append((
+            result['has_mask' if maskProb > mask_threshold else 'has_no_mask'].append((
                 int(faceBox[0]), int(faceBox[1]), int(faceBox[2]), int(faceBox[3])
             ))
 
