@@ -26,7 +26,7 @@ def initialize():
 @torch.no_grad()
 def detect(
     images: Union[np.ndarray, List[np.ndarray]] = None,
-    mask_threshold: float = 0.85,
+    mask_threshold: float = 0.9,
 ):
     '''
     This function is meant to be run on inference.
